@@ -750,6 +750,7 @@
                             // element.onerror = reject;
                             element.onerror = function () {
                                 fail('element load error: '+dataUrl,resolve);
+                                reject();
                             };
                             element.src = dataUrl;
                         });
