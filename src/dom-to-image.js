@@ -1,6 +1,12 @@
 (function (global) {
     'use strict';
-
+    // url,delay,callback,type,viewPortSize,setting
+	if(!options.url){
+		console.log("url can't be empty!");
+		return;
+	}
+	
+	
     var util = newUtil();
     var inliner = newInliner();
     var fontFaces = newFontFaces();

@@ -1,0 +1,34 @@
+<html>
+
+<head>
+	<script src="../dist/quick-capture.min.js"></script>
+	<style>
+	
+	</style>
+</head>
+<body>
+<image src="" width="400" height"400" id="image"> 
+<br/>
+<input id="url" type="text">
+<br/>
+<button onclick="capture()">Capture</button>
+
+<script>
+function capture(){
+		
+	quickCapture({
+		url:document.getElementById('url').value,
+		callback:function(blob){
+			var imageUrl = urlCreator.createObjectURL(blob);
+			document.getElementById('image').src=imageUrl;
+			console.log("Capture finished sucessfully!");
+		}
+	});
+}
+</script>
+
+
+
+</body>
+
+</html>
