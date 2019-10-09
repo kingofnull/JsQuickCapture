@@ -35,6 +35,11 @@
         global.domtoimage = domtoimage;
 
 
+    function fail(message,resolve) {
+        console.error(message);
+        resolve('');
+    }
+
     /**
      * @param {Node} node - The DOM Node object to render
      * @param {Object} options - Rendering options
@@ -458,8 +463,8 @@
                 };
                 // image.onerror = reject;
                 image.onerror = function () {
-                    console.error('image load error:',util);
-                    resolve('');
+                    //fail('image load error:'+image.src,resolve);
+                    console.error('image load error:',image.src);
                 };
                 image.src = uri;
             });
@@ -474,10 +479,7 @@
             }
 
             return new Promise(function (resolve) {
-                function fail(message) {
-                    console.error(message);
-                    resolve('');
-                }
+
                 try {
                     var request = new XMLHttpRequest();
 
@@ -487,7 +489,7 @@
                     request.timeout = TIMEOUT;
                     request.open('GET', url, true);
                     request.onerror =function () {
-                        fail('resource fetch failed: ' + url);
+                        fail('resource fetch failed: ' + url,resolve);
                     }
                         request.send();
 
@@ -498,8 +500,8 @@
                             placeholder = split[1];
                         }
                     }
-                }catch {
-                    fail('resource fetch failed: ' + url);
+                }catch (e){
+                    fail('resource fetch failed: ' + url,resolve);
                 }
 
 
@@ -510,7 +512,7 @@
                         if(placeholder) {
                             resolve(placeholder);
                         } else {
-                            fail('cannot fetch resource: ' + url + ', status: ' + request.status);
+                            fail('cannot fetch resource: ' + url + ', status: ' + request.status,resolve);
                         }
 
                         return;
@@ -528,7 +530,7 @@
                     if(placeholder) {
                         resolve(placeholder);
                     } else {
-                        fail('timeout of ' + TIMEOUT + 'ms occured while fetching resource: ' + url);
+                        fail('timeout of ' + TIMEOUT + 'ms occured while fetching resource: ' + url,resolve);
                     }
                 }
 
@@ -611,6 +613,10 @@
         }
 
         function inline(string, url, baseUrl, get) {
+            // Promise.reject(url);
+           /* if(url.substr(-4)==".svg"){
+                Promise.reject(url);
+            }*/
             return Promise.resolve(url)
                 .then(function (url) {
                     return baseUrl ? util.resolveUrl(url, baseUrl) : url;
@@ -661,7 +667,8 @@
             return readAll(document)
                 .then(function (webFonts) {
                     return Promise.all(
-                        webFonts.map(function (webFont) {
+                           webFonts.map(function (webFont) {
+
                             return webFont.resolve();
                         })
                     );
@@ -705,6 +712,7 @@
                 return {
                     resolve: function resolve() {
                         var baseUrl = (webFontRule.parentStyleSheet || {}).href;
+                        // console.log('newWebFont',baseUrl);
                         return inliner.inlineAll(webFontRule.cssText, baseUrl);
                     },
                     src: function () {
@@ -741,8 +749,7 @@
                             element.onload = resolve;
                             // element.onerror = reject;
                             element.onerror = function () {
-                                console.error('element load error:',dataUrl);
-                                resolve('');
+                                fail('element load error: '+dataUrl,resolve);
                             };
                             element.src = dataUrl;
                         });
@@ -782,6 +789,8 @@
                         return node;
                     });
             }
+
+
         }
     }
 })(this);
